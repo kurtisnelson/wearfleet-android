@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/status_unknown"
+        android:id="@+id/status_text"
+        android:layout_toRightOf="@+id/status_label"
+        android:textSize="24sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/status_label"
+        android:id="@+id/status_label"
+        android:layout_alignParentLeft="true"
+        android:textSize="24sp"/>
+
+    <ToggleButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Activated"
+        android:id="@+id/activate_toggle"
+        android:layout_below="@+id/status_text"
+        android:layout_centerHorizontal="true" />
+
+</RelativeLayout>
