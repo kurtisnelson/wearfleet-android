@@ -5,8 +5,6 @@ import android.graphics.Canvas;
 import android.view.SurfaceHolder;
 import android.view.View;
 
-import de.greenrobot.event.EventBus;
-
 public class StatusDrawer implements SurfaceHolder.Callback {
     private SurfaceHolder mHolder;
     private StatusView mView;
@@ -44,7 +42,6 @@ public class StatusDrawer implements SurfaceHolder.Callback {
     @Override
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
         mHolder = null;
-        EventBus.getDefault().unregister(this);
     }
 
     public void draw() {

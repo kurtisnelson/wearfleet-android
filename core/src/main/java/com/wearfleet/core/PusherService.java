@@ -47,6 +47,7 @@ public class PusherService extends Service {
         deviceChannelName = "private-device_"+deviceId;
         fleetChannelName = "presence-fleet_"+fleetId;
         pusher = new Pusher(getString(R.string.pusher_key), options);
+        EventBus.getDefault().registerSticky(this);
     }
 
     @Override
@@ -64,65 +65,77 @@ public class PusherService extends Service {
             }
         }, ConnectionState.ALL);
 
-        fleetChannel = pusher.subscribePresence(fleetChannelName,
-                new PresenceChannelEventListener() {
-                    @Override
-                    public void onSubscriptionSucceeded(String channelName) {
-                        fleetChannelActive = true;
-                    }
+        if(fleetChannel == null) {
+            fleetChannel = pusher.subscribePresence(fleetChannelName,
+                    new PresenceChannelEventListener() {
+                        @Override
+                        public void onSubscriptionSucceeded(String channelName) {
+                            fleetChannelActive = true;
+                        }
 
-                    @Override
-                    public void onUsersInformationReceived(String channelName, Set<User> users) {
+                        @Override
+                        public void onUsersInformationReceived(String channelName, Set<User> users) {
 
-                    }
+                        }
 
-                    @Override
-                    public void userSubscribed(String channelName, User user) {
-                        Location l = EventBus.getDefault().getStickyEvent(LocationEvent.class).getLocation();
-                        pushLocation(l);
-                    }
-
-                    @Override
-                    public void userUnsubscribed(String channelName, User user) {
-
-                    }
-
-                    @Override
-                    public void onAuthenticationFailure(String message, Exception e) {
-                        Log.e(TAG, "Auth Failure: "+message);
-                    }
-
-                    @Override
-                    public void onEvent(String channelName, String eventName, String data) {
-                        EventBus.getDefault().post(new PushEvent(channelName, eventName, data));
-                    }
-        });
-
-        deviceChannel = pusher.subscribePrivate(deviceChannelName,
-                new PrivateChannelEventListener() {
-                    @Override
-                    public void onAuthenticationFailure(String message, Exception e) {
-                        Log.e(TAG, "Auth Failure: "+message);
-                    }
-
-                    @Override
-                    public void onSubscriptionSucceeded(String channelName) {
-                        deviceChannelActive = true;
-                        LocationEvent e = EventBus.getDefault().getStickyEvent(LocationEvent.class);
-                        if(e != null) {
-                            Location l = e.getLocation();
+                        @Override
+                        public void userSubscribed(String channelName, User user) {
+                            Location l = EventBus.getDefault().getStickyEvent(LocationEvent.class).getLocation();
                             pushLocation(l);
                         }
-                    }
 
-                    @Override
-                    public void onEvent(String channelName, String eventName, String data) {
-                        EventBus.getDefault().post(new PushEvent(channelName, eventName, data));
+                        @Override
+                        public void userUnsubscribed(String channelName, User user) {
+
+                        }
+
+                        @Override
+                        public void onAuthenticationFailure(String message, Exception e) {
+                            Log.e(TAG, "Auth Failure: " + message);
+                        }
+
+                        @Override
+                        public void onEvent(String channelName, String eventName, String data) {
+                        }
                     }
-                }
-        );
-        EventBus.getDefault().registerSticky(this);
+            );
+        }
+
+        if(deviceChannel == null) {
+            deviceChannel = pusher.subscribePrivate(deviceChannelName,
+                    new PrivateChannelEventListener() {
+                        @Override
+                        public void onAuthenticationFailure(String message, Exception e) {
+                            Log.e(TAG, "Auth Failure: " + message);
+                        }
+
+                        @Override
+                        public void onSubscriptionSucceeded(String channelName) {
+                            deviceChannelActive = true;
+                            LocationEvent e = EventBus.getDefault().getStickyEvent(LocationEvent.class);
+                            if (e != null) {
+                                Location l = e.getLocation();
+                                pushLocation(l);
+                            }
+                        }
+
+                        @Override
+                        public void onEvent(String channelName, String eventName, String data) {
+                        }
+                    }
+            );
+        }
+
+        setupFleet();
         return START_STICKY;
+    }
+
+    private void setupFleet() {
+        FleetEventListener fleetListener = new FleetEventListener();
+        fleetChannel.bind("client-all", fleetListener);
+        fleetChannel.bind("all", fleetListener);
+        deviceChannel.bind("client-msg", fleetListener);
+        deviceChannel.bind("msg", fleetListener);
     }
 
     @Override

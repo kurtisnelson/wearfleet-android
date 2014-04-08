@@ -4,12 +4,18 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.util.Log;
 
+import com.google.android.glass.app.Card;
 import com.google.android.glass.timeline.LiveCard;
 import com.google.android.glass.timeline.TimelineManager;
 import com.wearfleet.core.PusherService;
+import com.wearfleet.core.events.ChatEvent;
+
+import de.greenrobot.event.EventBus;
 
 public class LiveCardService extends Service {
+    private static final String TAG = "LiveCardService";
     private LiveCard mLiveCard;
     private static final String LIVE_CARD_TAG = "service_card";
     private StatusDrawer mCallback;
@@ -22,10 +28,17 @@ public class LiveCardService extends Service {
     }
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         PusherService.stop(this);
         unpublishCard();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -46,7 +59,6 @@ public class LiveCardService extends Service {
                     intent, 0));
             mLiveCard.publish(LiveCard.PublishMode.REVEAL);
         } else {
-            // Card is already published.
             return;
         }
     }
@@ -60,5 +72,14 @@ public class LiveCardService extends Service {
             mLiveCard.unpublish();
             mLiveCard = null;
         }
+    }
+
+    public void onEventMainThread(ChatEvent e){
+        Log.d(TAG, "ChatEvent");
+        Card c = new Card(this);
+        c.setText(e.getMessage());
+        c.setFootnote(e.getName());
+        TimelineManager tm = TimelineManager.from(this);
+        tm.insert(c);
     }
 }
