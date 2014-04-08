@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">WearFleet</string>
+    <string name="glass_voice_trigger">share my location</string>
+    <string name="menu_stop">Stop</string>
 </resources>
