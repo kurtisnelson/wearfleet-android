@@ -108,8 +108,11 @@ public class PusherService extends Service {
                     @Override
                     public void onSubscriptionSucceeded(String channelName) {
                         deviceChannelActive = true;
-                        Location l = EventBus.getDefault().getStickyEvent(LocationEvent.class).getLocation();
-                        pushLocation(l);
+                        LocationEvent e = EventBus.getDefault().getStickyEvent(LocationEvent.class);
+                        if(e != null) {
+                            Location l = e.getLocation();
+                            pushLocation(l);
+                        }
                     }
 
                     @Override
