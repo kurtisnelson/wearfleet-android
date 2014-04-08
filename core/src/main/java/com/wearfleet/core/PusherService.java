@@ -10,8 +10,11 @@ import android.util.Log;
 
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
+import com.pusher.client.channel.Channel;
 import com.pusher.client.channel.PresenceChannel;
 import com.pusher.client.channel.PresenceChannelEventListener;
+import com.pusher.client.channel.PrivateChannel;
+import com.pusher.client.channel.PrivateChannelEventListener;
 import com.pusher.client.channel.User;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
@@ -29,15 +32,20 @@ public class PusherService extends Service {
     private static final String TAG = "PusherService";
     private static final String AUTHORIZER_ENDPOINT = "http://my.wearfleet.com/users/pusher_auth?user_email=kurtisnelson@gmail.com&user_token=6exy5enz-KoXUa_qt9Kn";
     private Pusher pusher;
+    private PrivateChannel deviceChannel;
     private PresenceChannel fleetChannel;
-    private String fleetChannelName = "presence-fleet";
-    private boolean fleetChannelActive = false;
+    private String fleetChannelName, deviceChannelName;
+    private boolean fleetChannelActive, deviceChannelActive = false;
+    private int deviceId = 1;
+    private int fleetId = 1;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        HttpAuthorizer authorizer = new HttpAuthorizer(AUTHORIZER_ENDPOINT);
+        HttpAuthorizer authorizer = new HttpAuthorizer(AUTHORIZER_ENDPOINT+"&device_id="+deviceId);
         PusherOptions options = new PusherOptions().setAuthorizer(authorizer);
+        deviceChannelName = "private-device_"+deviceId;
+        fleetChannelName = "presence-fleet_"+fleetId;
         pusher = new Pusher(getString(R.string.pusher_key), options);
     }
 
@@ -61,8 +69,6 @@ public class PusherService extends Service {
                     @Override
                     public void onSubscriptionSucceeded(String channelName) {
                         fleetChannelActive = true;
-                        Location l = EventBus.getDefault().getStickyEvent(LocationEvent.class).getLocation();
-                        pushLocation(l);
                     }
 
                     @Override
@@ -72,7 +78,8 @@ public class PusherService extends Service {
 
                     @Override
                     public void userSubscribed(String channelName, User user) {
-
+                        Location l = EventBus.getDefault().getStickyEvent(LocationEvent.class).getLocation();
+                        pushLocation(l);
                     }
 
                     @Override
@@ -90,6 +97,27 @@ public class PusherService extends Service {
                         EventBus.getDefault().post(new PushEvent(channelName, eventName, data));
                     }
         });
+
+        deviceChannel = pusher.subscribePrivate(deviceChannelName,
+                new PrivateChannelEventListener() {
+                    @Override
+                    public void onAuthenticationFailure(String message, Exception e) {
+                        Log.e(TAG, "Auth Failure: "+message);
+                    }
+
+                    @Override
+                    public void onSubscriptionSucceeded(String channelName) {
+                        deviceChannelActive = true;
+                        Location l = EventBus.getDefault().getStickyEvent(LocationEvent.class).getLocation();
+                        pushLocation(l);
+                    }
+
+                    @Override
+                    public void onEvent(String channelName, String eventName, String data) {
+                        EventBus.getDefault().post(new PushEvent(channelName, eventName, data));
+                    }
+                }
+        );
         EventBus.getDefault().registerSticky(this);
         return START_STICKY;
     }
@@ -117,13 +145,15 @@ public class PusherService extends Service {
     }
 
     private void pushLocation(Location l){
-        if(fleetChannel != null && fleetChannelActive)
-            fleetChannel.trigger("client-location", "{\"latitude\":\""+l.getLatitude() +"\", \"longitude\":\""+l.getLongitude()+"\"}");
+        if(deviceChannel != null && deviceChannelActive) {
+            deviceChannel.trigger("client-location", "{\"device\":\"" + deviceId + "\", \"latitude\":\"" + l.getLatitude() + "\", \"longitude\":\"" + l.getLongitude() + "\"}");
+        }
     }
 
     private void pushBearing(int bearing){
-        if(fleetChannel != null && fleetChannelActive)
-            fleetChannel.trigger("client-bearing", "{\"bearing\":\""+bearing+"\"}");
+        if(deviceChannel != null && deviceChannelActive) {
+            deviceChannel.trigger("client-bearing", "{\"device\":\"" + deviceId + "\", \"bearing\":\"" + bearing + "\"}");
+        }
     }
 
     public static void start(Context c) {
