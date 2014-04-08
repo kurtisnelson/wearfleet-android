@@ -8,6 +8,7 @@ import android.location.Location;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.google.gson.Gson;
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
 import com.pusher.client.channel.Channel;
@@ -21,6 +22,7 @@ import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.util.HttpAuthorizer;
 import com.wearfleet.core.events.BearingEvent;
+import com.wearfleet.core.events.ChatEvent;
 import com.wearfleet.core.events.LocationEvent;
 import com.wearfleet.core.events.PushEvent;
 
@@ -29,6 +31,7 @@ import java.util.Set;
 import de.greenrobot.event.EventBus;
 
 public class PusherService extends Service {
+    private static final Gson gson = new Gson();
     private static final String TAG = "PusherService";
     private static final String AUTHORIZER_ENDPOINT = "http://my.wearfleet.com/users/pusher_auth?user_email=kurtisnelson@gmail.com&user_token=6exy5enz-KoXUa_qt9Kn";
     private Pusher pusher;
@@ -154,6 +157,14 @@ public class PusherService extends Service {
     public void onEventAsync(LocationEvent e) {
         Location l = e.getLocation();
         pushLocation(l);
+    }
+
+    public void onEventAsync(ChatEvent e) {
+        Log.d(TAG, e.getMessage());
+        if(e.getMode() == ChatEvent.Mode.BROADCAST_OUT){
+            e.setDevice(deviceId);
+            fleetChannel.trigger("client-all", gson.toJson(e));
+        }
     }
 
     public void onEventAsync(BearingEvent e) {

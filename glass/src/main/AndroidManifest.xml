@@ -9,6 +9,9 @@
         <activity
             android:name=".MenuActivity"
             android:theme="@style/MenuTheme"></activity>
+        <activity android:name=".ChatActivity">
+
+        </activity>
 
         <service android:name=".LiveCardService">
             <intent-filter>

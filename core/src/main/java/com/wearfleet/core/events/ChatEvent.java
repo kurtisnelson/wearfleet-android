@@ -1,15 +1,32 @@
 package com.wearfleet.core.events;
 
 import com.google.gson.Gson;
-import com.wearfleet.core.gson.ChatData;
+
+import com.google.gson.annotations.SerializedName;
 
 public class ChatEvent {
+    @SerializedName("name")
     private final String name;
+
+    @SerializedName("message")
     private final String message;
-    private final Mode mode;
+    private Mode mode;
+
+    @SerializedName("device_id")
+    private int device;
+
+    public ChatEvent(String spokenText) {
+        this.message = spokenText;
+        this.mode = Mode.BROADCAST_OUT;
+        this.name = "Me";
+    }
+
+    public void setDevice(int device) {
+        this.device = device;
+    }
 
     public enum Mode {
-        DEVICE, BROADCAST
+        DEVICE_IN, BROADCAST_IN, DEVICE_OUT, BROADCAST_OUT
     }
 
     private static Gson gson = new Gson();
@@ -33,17 +50,19 @@ public class ChatEvent {
     }
 
     public static ChatEvent newBroadcast(String json) {
-        ChatData msg = parseJson(json);
-        return new ChatEvent(msg.name, msg.message, Mode.BROADCAST);
+        ChatEvent msg = parseJson(json);
+        msg.mode = Mode.BROADCAST_IN;
+        return msg;
     }
 
-    private static ChatData parseJson(String json) {
-        return gson.fromJson(json, ChatData.class);
+    private static ChatEvent parseJson(String json) {
+        return gson.fromJson(json, ChatEvent.class);
     }
 
     public static ChatEvent newDevice(String json) {
-        ChatData msg = parseJson(json);
-        return new ChatEvent(msg.name, msg.message, Mode.DEVICE);
+        ChatEvent msg = parseJson(json);
+        msg.mode = Mode.DEVICE_IN;
+        return msg;
     }
 }
 
