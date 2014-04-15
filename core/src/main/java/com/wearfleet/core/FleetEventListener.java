@@ -16,12 +16,12 @@ public class FleetEventListener implements PresenceChannelEventListener {
     @Override
     public void onEvent(String channelName, String eventName, String data) {
         Object event;
-        if(eventName.equals("client-all") || eventName.equals("all")){
+        if (eventName.equals("client-all") || eventName.equals("all")) {
             event = ChatEvent.newBroadcast(data);
-        }else if(eventName.equals("client-msg") || eventName.equals("msg")){
+        } else if (eventName.equals("client-msg") || eventName.equals("msg")) {
             event = ChatEvent.newDevice(data);
-        }else{
-           event = new PushEvent(channelName, eventName, data);
+        } else {
+            event = new PushEvent(channelName, eventName, data);
         }
         EventBus.getDefault().post(event);
     }

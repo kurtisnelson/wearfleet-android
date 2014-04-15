@@ -13,7 +13,7 @@ import com.pusher.client.connection.ConnectionState;
 
 import de.greenrobot.event.EventBus;
 
-public class StatusFragment extends Fragment{
+public class StatusFragment extends Fragment {
 
     private static final String STATE_RUNNING = "STATE_RUNNING";
     private static final String STATE_CON_STATUS = "STATE_CON_STATUS";
@@ -33,21 +33,21 @@ public class StatusFragment extends Fragment{
         statusText = (TextView) v.findViewById(R.id.status_text);
         activateToggle = (ToggleButton) v.findViewById(R.id.activate_toggle);
 
-        if(savedInstanceState != null && savedInstanceState.getBoolean(STATE_RUNNING)){
+        if (savedInstanceState != null && savedInstanceState.getBoolean(STATE_RUNNING)) {
             activateToggle.setChecked(true);
-        }else {
+        } else {
             activateToggle.setChecked(PusherService.isRunning(getActivity()));
         }
 
-        if(savedInstanceState != null)
+        if (savedInstanceState != null)
             statusText.setText(savedInstanceState.getCharSequence(STATE_CON_STATUS));
 
         activateToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if(b){
+                if (b) {
                     PusherService.start(getActivity());
-                }else{
+                } else {
                     PusherService.stop(getActivity());
                 }
             }
@@ -74,8 +74,8 @@ public class StatusFragment extends Fragment{
         EventBus.getDefault().unregister(this);
     }
 
-    public void onEventMainThread(ConnectionState lastStatus){
-        if(lastStatus != null)
+    public void onEventMainThread(ConnectionState lastStatus) {
+        if (lastStatus != null)
             statusText.setText(lastStatus.toString());
     }
 }

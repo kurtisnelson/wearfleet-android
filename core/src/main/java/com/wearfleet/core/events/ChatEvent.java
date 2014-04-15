@@ -1,7 +1,6 @@
 package com.wearfleet.core.events;
 
 import com.google.gson.Gson;
-
 import com.google.gson.annotations.SerializedName;
 
 public class ChatEvent {

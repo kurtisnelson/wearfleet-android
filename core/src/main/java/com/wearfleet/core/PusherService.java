@@ -11,7 +11,6 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
-import com.pusher.client.channel.Channel;
 import com.pusher.client.channel.PresenceChannel;
 import com.pusher.client.channel.PresenceChannelEventListener;
 import com.pusher.client.channel.PrivateChannel;
@@ -24,7 +23,6 @@ import com.pusher.client.util.HttpAuthorizer;
 import com.wearfleet.core.events.BearingEvent;
 import com.wearfleet.core.events.ChatEvent;
 import com.wearfleet.core.events.LocationEvent;
-import com.wearfleet.core.events.PushEvent;
 
 import java.util.Set;
 
@@ -45,10 +43,10 @@ public class PusherService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        HttpAuthorizer authorizer = new HttpAuthorizer(AUTHORIZER_ENDPOINT+"&device_id="+deviceId);
+        HttpAuthorizer authorizer = new HttpAuthorizer(AUTHORIZER_ENDPOINT + "&device_id=" + deviceId);
         PusherOptions options = new PusherOptions().setAuthorizer(authorizer);
-        deviceChannelName = "private-device_"+deviceId;
-        fleetChannelName = "presence-fleet_"+fleetId;
+        deviceChannelName = "private-device_" + deviceId;
+        fleetChannelName = "presence-fleet_" + fleetId;
         pusher = new Pusher(getString(R.string.pusher_key), options);
         EventBus.getDefault().registerSticky(this);
     }
@@ -68,7 +66,7 @@ public class PusherService extends Service {
             }
         }, ConnectionState.ALL);
 
-        if(fleetChannel == null) {
+        if (fleetChannel == null) {
             fleetChannel = pusher.subscribePresence(fleetChannelName,
                     new PresenceChannelEventListener() {
                         @Override
@@ -83,7 +81,7 @@ public class PusherService extends Service {
 
                         @Override
                         public void userSubscribed(String channelName, User user) {
-                            if(EventBus.getDefault().getStickyEvent(LocationEvent.class) != null) {
+                            if (EventBus.getDefault().getStickyEvent(LocationEvent.class) != null) {
                                 Location l = EventBus.getDefault().getStickyEvent(LocationEvent.class).getLocation();
                                 pushLocation(l);
                             }
@@ -106,7 +104,7 @@ public class PusherService extends Service {
             );
         }
 
-        if(deviceChannel == null) {
+        if (deviceChannel == null) {
             deviceChannel = pusher.subscribePrivate(deviceChannelName,
                     new PrivateChannelEventListener() {
                         @Override
@@ -120,7 +118,8 @@ public class PusherService extends Service {
                             LocationEvent e = EventBus.getDefault().getStickyEvent(LocationEvent.class);
                             if (e != null) {
                                 Location l = e.getLocation();
-                                pushLocation(l);
+                                if(l != null)
+                                    pushLocation(l);
                             }
                         }
 
@@ -163,7 +162,7 @@ public class PusherService extends Service {
 
     public void onEventAsync(ChatEvent e) {
         Log.d(TAG, e.getMessage());
-        if(e.getMode() == ChatEvent.Mode.BROADCAST_OUT){
+        if (e.getMode() == ChatEvent.Mode.BROADCAST_OUT) {
             e.setDevice(deviceId);
             fleetChannel.trigger("client-all", gson.toJson(e));
         }
@@ -173,14 +172,14 @@ public class PusherService extends Service {
         pushBearing(e.getBearing());
     }
 
-    private void pushLocation(Location l){
-        if(deviceChannel != null && deviceChannelActive) {
+    private void pushLocation(Location l) {
+        if (deviceChannel != null && deviceChannelActive) {
             deviceChannel.trigger("client-location", "{\"device\":\"" + deviceId + "\", \"latitude\":\"" + l.getLatitude() + "\", \"longitude\":\"" + l.getLongitude() + "\"}");
         }
     }
 
-    private void pushBearing(float bearing){
-        if(deviceChannel != null && deviceChannelActive) {
+    private void pushBearing(float bearing) {
+        if (deviceChannel != null && deviceChannelActive) {
             deviceChannel.trigger("client-bearing", "{\"device\":\"" + deviceId + "\", \"bearing\":\"" + bearing + "\"}");
         }
     }
@@ -200,12 +199,12 @@ public class PusherService extends Service {
     }
 
     public static boolean isRunning(Context c) {
-            ActivityManager manager = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
-            for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-                if (PusherService.class.getName().equals(service.service.getClassName())) {
-                    return true;
-                }
+        ActivityManager manager = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (PusherService.class.getName().equals(service.service.getClassName())) {
+                return true;
             }
-            return false;
+        }
+        return false;
     }
 }
