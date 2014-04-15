@@ -18,8 +18,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name="com.wearfleet.core.PositionService" />
-        <service android:name="com.wearfleet.core.PusherService" />
+        <service android:name=".FleetService" />
     </application>
 
 </manifest>

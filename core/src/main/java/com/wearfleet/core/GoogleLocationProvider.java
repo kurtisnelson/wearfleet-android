@@ -38,7 +38,6 @@ public class GoogleLocationProvider implements
 
         mLocationClient = new LocationClient(c, this, this);
         mLocationClient.connect();
-        EventBus.getDefault().postSticky(new LocationEvent(mLocationClient.getLastLocation()));
     }
 
     @Override
@@ -52,6 +51,7 @@ public class GoogleLocationProvider implements
     @Override
     public void onConnected(Bundle bundle) {
         Log.d(TAG, "Connected");
+        EventBus.getDefault().postSticky(new LocationEvent(mLocationClient.getLastLocation()));
         mLocationClient.requestLocationUpdates(mLocationRequest, mLocationListener);
     }
 

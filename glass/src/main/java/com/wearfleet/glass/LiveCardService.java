@@ -9,7 +9,6 @@ import android.util.Log;
 import com.google.android.glass.app.Card;
 import com.google.android.glass.timeline.LiveCard;
 import com.google.android.glass.timeline.TimelineManager;
-import com.wearfleet.core.PusherService;
 import com.wearfleet.core.events.ChatEvent;
 
 import de.greenrobot.event.EventBus;
@@ -22,7 +21,7 @@ public class LiveCardService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        PusherService.start(this);
+        FleetService.start(this);
         publishCard();
         return START_STICKY;
     }
@@ -36,7 +35,7 @@ public class LiveCardService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        PusherService.stop(this);
+        FleetService.stop(this);
         unpublishCard();
         EventBus.getDefault().unregister(this);
     }

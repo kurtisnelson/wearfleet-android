@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
 import com.wearfleet.core.SingleFragmentActivity;
-import com.wearfleet.core.StatusFragment;
 
 public class StatusActivity extends SingleFragmentActivity {
 

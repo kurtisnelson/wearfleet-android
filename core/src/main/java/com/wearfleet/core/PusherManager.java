@@ -1,11 +1,7 @@
 package com.wearfleet.core;
 
-import android.app.ActivityManager;
-import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.os.IBinder;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -28,7 +24,7 @@ import java.util.Set;
 
 import de.greenrobot.event.EventBus;
 
-public class PusherService extends Service {
+public class PusherManager {
     private static final Gson gson = new Gson();
     private static final String TAG = "PusherService";
     private static final String AUTHORIZER_ENDPOINT = "http://my.wearfleet.com/users/pusher_auth?user_email=kurtisnelson@gmail.com&user_token=6exy5enz-KoXUa_qt9Kn";
@@ -40,19 +36,16 @@ public class PusherService extends Service {
     private int deviceId = 1;
     private int fleetId = 1;
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
+    public PusherManager(String pusherKey) {
         HttpAuthorizer authorizer = new HttpAuthorizer(AUTHORIZER_ENDPOINT + "&device_id=" + deviceId);
         PusherOptions options = new PusherOptions().setAuthorizer(authorizer);
         deviceChannelName = "private-device_" + deviceId;
         fleetChannelName = "presence-fleet_" + fleetId;
-        pusher = new Pusher(getString(R.string.pusher_key), options);
+        pusher = new Pusher(pusherKey, options);
         EventBus.getDefault().registerSticky(this);
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public void start() {
         pusher.connect(new ConnectionEventListener() {
             @Override
             public void onConnectionStateChange(ConnectionStateChange change) {
@@ -131,8 +124,9 @@ public class PusherService extends Service {
         }
 
         setupFleet();
-        return START_STICKY;
     }
+
+
 
     private void setupFleet() {
         FleetEventListener fleetListener = new FleetEventListener();
@@ -142,17 +136,10 @@ public class PusherService extends Service {
         deviceChannel.bind("msg", fleetListener);
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void shutdown() {
         Log.d(TAG, "Shutting down");
         pusher.disconnect();
         EventBus.getDefault().unregister(this);
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
     }
 
     public void onEventAsync(LocationEvent e) {
@@ -182,29 +169,5 @@ public class PusherService extends Service {
         if (deviceChannel != null && deviceChannelActive) {
             deviceChannel.trigger("client-bearing", "{\"device\":\"" + deviceId + "\", \"bearing\":\"" + bearing + "\"}");
         }
-    }
-
-    public static void start(Context c) {
-        Intent i = new Intent(c, PusherService.class);
-        c.startService(i);
-        Intent i2 = new Intent(c, PositionService.class);
-        c.startService(i2);
-    }
-
-    public static void stop(Context c) {
-        Intent i = new Intent(c, PusherService.class);
-        c.stopService(i);
-        Intent i2 = new Intent(c, PositionService.class);
-        c.stopService(i2);
-    }
-
-    public static boolean isRunning(Context c) {
-        ActivityManager manager = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (PusherService.class.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
     }
 }

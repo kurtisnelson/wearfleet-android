@@ -13,19 +13,12 @@ import com.pusher.client.connection.ConnectionState;
 
 import de.greenrobot.event.EventBus;
 
-public class StatusFragment extends Fragment {
+public abstract class StatusFragment extends Fragment {
 
-    private static final String STATE_RUNNING = "STATE_RUNNING";
+    protected static final String STATE_RUNNING = "STATE_RUNNING";
     private static final String STATE_CON_STATUS = "STATE_CON_STATUS";
     private TextView statusText;
-    private ToggleButton activateToggle;
-
-    public static StatusFragment newInstance() {
-        Bundle args = new Bundle();
-        StatusFragment fragment = new StatusFragment();
-        fragment.setArguments(args);
-        return fragment;
-    }
+    protected ToggleButton activateToggle;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -33,25 +26,8 @@ public class StatusFragment extends Fragment {
         statusText = (TextView) v.findViewById(R.id.status_text);
         activateToggle = (ToggleButton) v.findViewById(R.id.activate_toggle);
 
-        if (savedInstanceState != null && savedInstanceState.getBoolean(STATE_RUNNING)) {
-            activateToggle.setChecked(true);
-        } else {
-            activateToggle.setChecked(PusherService.isRunning(getActivity()));
-        }
-
         if (savedInstanceState != null)
             statusText.setText(savedInstanceState.getCharSequence(STATE_CON_STATUS));
-
-        activateToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if (b) {
-                    PusherService.start(getActivity());
-                } else {
-                    PusherService.stop(getActivity());
-                }
-            }
-        });
         return v;
     }
 
