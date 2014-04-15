@@ -83,8 +83,10 @@ public class PusherService extends Service {
 
                         @Override
                         public void userSubscribed(String channelName, User user) {
-                            Location l = EventBus.getDefault().getStickyEvent(LocationEvent.class).getLocation();
-                            pushLocation(l);
+                            if(EventBus.getDefault().getStickyEvent(LocationEvent.class) != null) {
+                                Location l = EventBus.getDefault().getStickyEvent(LocationEvent.class).getLocation();
+                                pushLocation(l);
+                            }
                         }
 
                         @Override
@@ -177,7 +179,7 @@ public class PusherService extends Service {
         }
     }
 
-    private void pushBearing(int bearing){
+    private void pushBearing(float bearing){
         if(deviceChannel != null && deviceChannelActive) {
             deviceChannel.trigger("client-bearing", "{\"device\":\"" + deviceId + "\", \"bearing\":\"" + bearing + "\"}");
         }
