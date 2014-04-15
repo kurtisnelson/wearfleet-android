@@ -29,7 +29,7 @@ public class FleetService extends com.wearfleet.core.FleetService {
     @Override
     public void onCreate() {
         super.onCreate();
-        EventBus.getDefault().register(this);
+        EventBus.getDefault().register(this, 1);
         mNotifyMgr =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
     }

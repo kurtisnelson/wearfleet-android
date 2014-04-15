@@ -36,6 +36,11 @@ public class ChatEvent {
         this.mode = mode;
     }
 
+    @Override
+    public String toString() {
+        return name + ": " + message;
+    }
+
     public String getName() {
         return name;
     }
