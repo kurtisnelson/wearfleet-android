@@ -56,17 +56,15 @@ public class FleetService extends com.wearfleet.core.FleetService {
 
         mBuilder.setStyle(mInboxStyle);
 
-        Intent resultIntent = new Intent(this, StatusActivity.class);
+        Intent resultIntent = new Intent(this, ChatActivity.class);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(StatusActivity.class);
+        stackBuilder.addParentStack(ChatActivity.class);
         stackBuilder.addNextIntent(resultIntent);
         PendingIntent resultPendingIntent =
-                stackBuilder.getPendingIntent(
-                        0,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
+                stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
         mBuilder.setContentIntent(resultPendingIntent);
+
         mBuilder.setOngoing(true);
 
         PendingIntent stopIntent = PendingIntent.getBroadcast(this, 0, new Intent(super.STOP_SERVICE_FILTER), 0);
