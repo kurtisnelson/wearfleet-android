@@ -2,11 +2,14 @@ package com.wearfleet.glass;
 
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.IBinder;
 import android.util.Log;
 
 import com.google.android.glass.app.Card;
+import com.google.android.glass.media.Sounds;
 import com.google.android.glass.timeline.LiveCard;
 import com.google.android.glass.timeline.TimelineManager;
 import com.wearfleet.core.events.ChatEvent;
@@ -80,5 +83,7 @@ public class LiveCardService extends Service {
         c.setFootnote(e.getName());
         TimelineManager tm = TimelineManager.from(this);
         tm.insert(c);
+        AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        audio.playSoundEffect(Sounds.SUCCESS);
     }
 }
