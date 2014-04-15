@@ -45,12 +45,12 @@ public class FleetService extends com.wearfleet.core.FleetService {
         mBuilder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.ic_launcher)
-                        .setContentTitle("WearFleet")
-                        .setContentText(getString(R.string.status_unknown));
+                        .setContentTitle(getString(R.string.status_unknown))
+                        .setContentText("No messages");
 
         mInboxStyle =
                 new NotificationCompat.InboxStyle();
-        mInboxStyle.setBigContentTitle("WearFleet");
+        mInboxStyle.setBigContentTitle(getString(R.string.status_unknown));
 
         mBuilder.setStyle(mInboxStyle);
 
@@ -77,8 +77,8 @@ public class FleetService extends com.wearfleet.core.FleetService {
 
     public void onEventMainThread(ConnectionState lastStatus) {
         if (lastStatus != null) {
-            mBuilder.setContentText(lastStatus.toString());
-            mInboxStyle.setSummaryText(lastStatus.toString());
+            mBuilder.setContentTitle(lastStatus.toString());
+            mInboxStyle.setBigContentTitle(lastStatus.toString());
             mNotifyMgr.notify(
                     NOTIFICATION_ID,
                     mBuilder.build());
@@ -87,6 +87,7 @@ public class FleetService extends com.wearfleet.core.FleetService {
 
     public void onEventMainThread(ChatEvent e) {
         mBuilder.setNumber(++numMessages);
+        mBuilder.setContentText("New Messages");
         mInboxStyle.addLine(e.getMessage());
         mNotifyMgr.notify(
                 NOTIFICATION_ID,
