@@ -6,7 +6,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.IBinder;
+
+import com.wearfleet.core.events.AbortEvent;
+
+import de.greenrobot.event.EventBus;
 
 public abstract class FleetService extends Service  {
     public static final String STOP_SERVICE_FILTER = "STOP_FLEET_SERVICE";
@@ -25,10 +31,18 @@ public abstract class FleetService extends Service  {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        pusherManager.start();
-        Intent i2 = new Intent(this, PositionService.class);
-        this.startService(i2);
         registerReceiver(stopServiceReceiver, new IntentFilter(STOP_SERVICE_FILTER));
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            pusherManager.start();
+            Intent i2 = new Intent(this, PositionService.class);
+            this.startService(i2);
+        } else {
+            EventBus.getDefault().post(new AbortEvent("No Network"));
+            stopSelf();
+        }
         return START_STICKY;
     }
 
@@ -54,7 +68,11 @@ public abstract class FleetService extends Service  {
     protected BroadcastReceiver stopServiceReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            stopSelf();
+       stopSelf();
         }
     };
+
+    public void onEvent(AbortEvent e) {
+        stopSelf();
+    }
 }

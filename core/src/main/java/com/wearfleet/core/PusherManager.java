@@ -1,6 +1,5 @@
 package com.wearfleet.core;
 
-import android.content.Intent;
 import android.location.Location;
 import android.util.Log;
 
@@ -16,6 +15,7 @@ import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.util.HttpAuthorizer;
+import com.wearfleet.core.events.AbortEvent;
 import com.wearfleet.core.events.BearingEvent;
 import com.wearfleet.core.events.ChatEvent;
 import com.wearfleet.core.events.LocationEvent;
@@ -26,7 +26,7 @@ import de.greenrobot.event.EventBus;
 
 public class PusherManager {
     private static final Gson gson = new Gson();
-    private static final String TAG = "PusherService";
+    private static final String TAG = "PusherManager";
     private static final String AUTHORIZER_ENDPOINT = "http://my.wearfleet.com/users/pusher_auth?user_email=kurtisnelson@gmail.com&user_token=6exy5enz-KoXUa_qt9Kn";
     private Pusher pusher;
     private PrivateChannel deviceChannel;
@@ -55,7 +55,7 @@ public class PusherManager {
 
             @Override
             public void onError(String message, String code, Exception e) {
-                Log.e(TAG, "Connection error: " + message, e);
+                EventBus.getDefault().post(new AbortEvent(e));
             }
         }, ConnectionState.ALL);
 

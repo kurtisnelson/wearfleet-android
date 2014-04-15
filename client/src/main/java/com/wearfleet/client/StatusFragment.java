@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 
 public class StatusFragment extends com.wearfleet.core.StatusFragment {
-
     public static StatusFragment newInstance() {
         Bundle args = new Bundle();
         StatusFragment fragment = new StatusFragment();

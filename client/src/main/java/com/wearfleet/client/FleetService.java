@@ -6,8 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.widget.Toast;
 
 import com.pusher.client.connection.ConnectionState;
+import com.wearfleet.core.events.AbortEvent;
 import com.wearfleet.core.events.ChatEvent;
 
 import de.greenrobot.event.EventBus;
@@ -94,6 +96,9 @@ public class FleetService extends com.wearfleet.core.FleetService {
                 mBuilder.build());
     }
 
+    public void onEventMainThread(AbortEvent e){
+        Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+    }
     private void stopNotification() {
         mNotifyMgr.cancel(NOTIFICATION_ID);
     }
