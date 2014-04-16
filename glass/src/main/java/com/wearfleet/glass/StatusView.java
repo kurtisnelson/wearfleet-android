@@ -7,11 +7,13 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.pusher.client.connection.ConnectionState;
+import com.wearfleet.core.events.ChatEvent;
 
 import de.greenrobot.event.EventBus;
 
 public class StatusView extends FrameLayout {
-    private final TextView mStatusView;
+    private final TextView mStatus;
+    private final TextView mFooter;
     private ChangeListener mChangeListener;
 
     public interface ChangeListener {
@@ -31,7 +33,8 @@ public class StatusView extends FrameLayout {
 
         LayoutInflater.from(context).inflate(R.layout.card_status, this);
 
-        mStatusView = (TextView) findViewById(R.id.status_text);
+        mStatus = (TextView) findViewById(R.id.status_text);
+        mFooter = (TextView) findViewById(R.id.footer);
         EventBus.getDefault().registerSticky(this);
     }
 
@@ -40,8 +43,21 @@ public class StatusView extends FrameLayout {
     }
 
     public void onEventMainThread(ConnectionState lastStatus){
-        if(lastStatus != null)
-            mStatusView.setText(lastStatus.toString());
+        if(lastStatus != null){
+            if(lastStatus.equals(ConnectionState.CONNECTED)){
+                mStatus.setText(getContext().getString(R.string.no_messages));
+            }else{
+                mStatus.setText(getContext().getString(R.string.status_unknown));
+            }
+        }
+        if (mChangeListener != null) {
+            mChangeListener.onChange();
+        }
+    }
+
+    public void onEventMainThread(ChatEvent e){
+        mStatus.setText(e.getMessage());
+        mFooter.setText(e.getName());
         if (mChangeListener != null) {
             mChangeListener.onChange();
         }

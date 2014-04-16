@@ -18,6 +18,7 @@ public class ChatActivity extends FragmentActivity{
         super.onCreate(savedInstanceState);
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         startActivityForResult(intent, SPEECH_MESSAGE);
+        finish();
     }
 
     @Override

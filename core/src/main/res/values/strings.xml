@@ -2,4 +2,7 @@
     <string name="app_name">Wearfleet</string>
     <string name="status_unknown">Unknown</string>
     <string name="status_label">Connection Status:</string>
+    <string name="send_button">Send</string>
+    <string name="no_messages">No Messages</string>
+    <string name="new_messages">New Messages</string>
 </resources>

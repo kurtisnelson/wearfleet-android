@@ -160,7 +160,7 @@ public class PusherManager {
     }
 
     private void pushLocation(Location l) {
-        if (deviceChannel != null && deviceChannelActive) {
+        if (l != null && deviceChannel != null && deviceChannelActive) {
             deviceChannel.trigger("client-location", "{\"device\":\"" + deviceId + "\", \"latitude\":\"" + l.getLatitude() + "\", \"longitude\":\"" + l.getLongitude() + "\"}");
         }
     }

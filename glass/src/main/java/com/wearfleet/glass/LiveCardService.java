@@ -11,7 +11,6 @@ import android.util.Log;
 import com.google.android.glass.app.Card;
 import com.google.android.glass.media.Sounds;
 import com.google.android.glass.timeline.LiveCard;
-import com.google.android.glass.timeline.TimelineManager;
 import com.wearfleet.core.events.ChatEvent;
 
 import de.greenrobot.event.EventBus;
@@ -50,18 +49,18 @@ public class LiveCardService extends Service {
 
     private void publishCard() {
         if (mLiveCard == null) {
-            TimelineManager tm = TimelineManager.from(this);
-            mLiveCard = tm.createLiveCard(LIVE_CARD_TAG);
-
+            mLiveCard = new LiveCard(this, LIVE_CARD_TAG);
+            mLiveCard.attach(this);
             mCallback = new StatusDrawer(this);
-            mLiveCard.setDirectRenderingEnabled(true).getSurfaceHolder().addCallback(mCallback);
+            mLiveCard.setDirectRenderingEnabled(true);
+            mLiveCard.getSurfaceHolder().addCallback(mCallback);
 
             Intent intent = new Intent(this, MenuActivity.class);
             mLiveCard.setAction(PendingIntent.getActivity(this, 0,
                     intent, 0));
             mLiveCard.publish(LiveCard.PublishMode.REVEAL);
         } else {
-            return;
+            mLiveCard.navigate();
         }
     }
 
@@ -78,12 +77,9 @@ public class LiveCardService extends Service {
 
     public void onEventMainThread(ChatEvent e){
         Log.d(TAG, "ChatEvent");
-        Card c = new Card(this);
-        c.setText(e.getMessage());
-        c.setFootnote(e.getName());
-        TimelineManager tm = TimelineManager.from(this);
-        tm.insert(c);
         AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         audio.playSoundEffect(Sounds.SUCCESS);
+        if(mLiveCard != null)
+            mLiveCard.navigate();
     }
 }
