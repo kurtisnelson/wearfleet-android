@@ -14,11 +14,6 @@ import de.greenrobot.event.EventBus;
 public class StatusView extends FrameLayout {
     private final TextView mStatus;
     private final TextView mFooter;
-    private ChangeListener mChangeListener;
-
-    public interface ChangeListener {
-        public void onChange();
-    }
 
     public StatusView(Context context) {
         this(context, null, 0);
@@ -38,10 +33,6 @@ public class StatusView extends FrameLayout {
         EventBus.getDefault().registerSticky(this);
     }
 
-    public void setListener(ChangeListener listener) {
-        mChangeListener = listener;
-    }
-
     public void onEventMainThread(ConnectionState lastStatus){
         if(lastStatus != null){
             if(lastStatus.equals(ConnectionState.CONNECTED)){
@@ -50,17 +41,11 @@ public class StatusView extends FrameLayout {
                 mStatus.setText(getContext().getString(R.string.status_unknown));
             }
         }
-        if (mChangeListener != null) {
-            mChangeListener.onChange();
-        }
     }
 
     public void onEventMainThread(ChatEvent e){
         mStatus.setText(e.getMessage());
         mFooter.setText(e.getName());
-        if (mChangeListener != null) {
-            mChangeListener.onChange();
-        }
     }
 
 }

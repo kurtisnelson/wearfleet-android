@@ -12,6 +12,8 @@ import com.wearfleet.core.events.BearingEvent;
 import com.wearfleet.core.events.LocationEvent;
 import com.wearfleet.core.utils.Config;
 
+import java.util.List;
+
 import de.greenrobot.event.EventBus;
 
 public class StockLocationProvider implements Provider {
@@ -29,12 +31,15 @@ public class StockLocationProvider implements Provider {
         criteria.setBearingRequired(true);
         criteria.setSpeedRequired(false);
 
-        String locationProvider = mLocationManager.getBestProvider(criteria, true);
+        List<String> locationProviders = mLocationManager.getProviders(criteria, true);
 
-        mLocationManager.requestLocationUpdates(locationProvider, c.getSharedPreferences(Config.PREFS_NAME, c.MODE_PRIVATE).getInt(PREF_LOCATION_PERIOD, LOCATION_PERIOD_DEFAULT), 2, mLocationListener);
-        Location lastLocation = mLocationManager.getLastKnownLocation(locationProvider);
+        for(String provider : locationProviders) {
+            Log.d(TAG, "Using " + provider + " for location");
+            mLocationManager.requestLocationUpdates(provider, c.getSharedPreferences(Config.PREFS_NAME, c.MODE_PRIVATE).getInt(PREF_LOCATION_PERIOD, LOCATION_PERIOD_DEFAULT), 2, mLocationListener);
+        }
+        Location lastLocation = mLocationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
         if(lastLocation == null)
-            Log.w(TAG, "Null location!");
+            Log.w(TAG, "Null last known location");
         EventBus.getDefault().postSticky(new LocationEvent(lastLocation));
     }
 

@@ -8,7 +8,6 @@ import android.media.AudioManager;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.google.android.glass.app.Card;
 import com.google.android.glass.media.Sounds;
 import com.google.android.glass.timeline.LiveCard;
 import com.wearfleet.core.events.ChatEvent;
@@ -19,7 +18,7 @@ public class LiveCardService extends Service {
     private static final String TAG = "LiveCardService";
     private LiveCard mLiveCard;
     private static final String LIVE_CARD_TAG = "service_card";
-    private StatusDrawer mCallback;
+    private StatusViewRenderer mRenderer;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -51,9 +50,9 @@ public class LiveCardService extends Service {
         if (mLiveCard == null) {
             mLiveCard = new LiveCard(this, LIVE_CARD_TAG);
             mLiveCard.attach(this);
-            mCallback = new StatusDrawer(this);
+            mRenderer = new StatusViewRenderer(this);
             mLiveCard.setDirectRenderingEnabled(true);
-            mLiveCard.getSurfaceHolder().addCallback(mCallback);
+            mLiveCard.getSurfaceHolder().addCallback(mRenderer);
 
             Intent intent = new Intent(this, MenuActivity.class);
             mLiveCard.setAction(PendingIntent.getActivity(this, 0,
@@ -67,8 +66,9 @@ public class LiveCardService extends Service {
 
     private void unpublishCard() {
         if (mLiveCard != null) {
-            if(mCallback != null){
-                mLiveCard.getSurfaceHolder().removeCallback(mCallback);
+            if(mRenderer != null){
+                mLiveCard.getSurfaceHolder().removeCallback(mRenderer);
+                mRenderer = null;
             }
             mLiveCard.unpublish();
             mLiveCard = null;
