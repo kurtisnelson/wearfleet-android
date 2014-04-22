@@ -32,8 +32,10 @@ public class StockLocationProvider implements Provider {
         String locationProvider = mLocationManager.getBestProvider(criteria, true);
 
         mLocationManager.requestLocationUpdates(locationProvider, c.getSharedPreferences(Config.PREFS_NAME, c.MODE_PRIVATE).getInt(PREF_LOCATION_PERIOD, LOCATION_PERIOD_DEFAULT), 2, mLocationListener);
-
-        EventBus.getDefault().postSticky(new LocationEvent(mLocationManager.getLastKnownLocation(locationProvider)));
+        Location lastLocation = mLocationManager.getLastKnownLocation(locationProvider);
+        if(lastLocation == null)
+            Log.w(TAG, "Null location!");
+        EventBus.getDefault().postSticky(new LocationEvent(lastLocation));
     }
 
     public void shutdown() {

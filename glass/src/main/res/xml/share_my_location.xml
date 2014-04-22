@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<trigger keyword="@string/glass_voice_trigger">
+<trigger command="SHARE_MY_LOCATION">
     <constraints
-        network="true" />
+        network="true"
+        location="true"/>
     </trigger>

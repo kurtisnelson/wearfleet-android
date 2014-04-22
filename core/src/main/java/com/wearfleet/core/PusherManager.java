@@ -74,7 +74,7 @@ public class PusherManager {
 
                         @Override
                         public void userSubscribed(String channelName, User user) {
-                            if (EventBus.getDefault().getStickyEvent(LocationEvent.class) != null) {
+                            if (EventBus.getDefault().getStickyEvent(LocationEvent.class).getLocation() != null) {
                                 Location l = EventBus.getDefault().getStickyEvent(LocationEvent.class).getLocation();
                                 pushLocation(l);
                             }
@@ -160,7 +160,7 @@ public class PusherManager {
     }
 
     private void pushLocation(Location l) {
-        if (l != null && deviceChannel != null && deviceChannelActive) {
+        if (deviceChannel != null && deviceChannelActive) {
             deviceChannel.trigger("client-location", "{\"device\":\"" + deviceId + "\", \"latitude\":\"" + l.getLatitude() + "\", \"longitude\":\"" + l.getLongitude() + "\"}");
         }
     }
