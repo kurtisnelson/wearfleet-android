@@ -19,6 +19,7 @@ import com.wearfleet.core.events.AbortEvent;
 import com.wearfleet.core.events.BearingEvent;
 import com.wearfleet.core.events.ChatEvent;
 import com.wearfleet.core.events.LocationEvent;
+import com.wearfleet.core.utils.Config;
 
 import java.util.Set;
 
@@ -27,20 +28,19 @@ import de.greenrobot.event.EventBus;
 public class PusherManager {
     private static final Gson gson = new Gson();
     private static final String TAG = "PusherManager";
-    private static final String AUTHORIZER_ENDPOINT = "http://my.wearfleet.com/users/pusher_auth?user_email=kurtisnelson@gmail.com&user_token=6exy5enz-KoXUa_qt9Kn";
+    private final int deviceId;
     private Pusher pusher;
     private PrivateChannel deviceChannel;
     private PresenceChannel fleetChannel;
     private String fleetChannelName, deviceChannelName;
     private boolean fleetChannelActive, deviceChannelActive = false;
-    private int deviceId = 1;
-    private int fleetId = 1;
 
     public PusherManager(String pusherKey) {
-        HttpAuthorizer authorizer = new HttpAuthorizer(AUTHORIZER_ENDPOINT + "&device_id=" + deviceId);
+        deviceId = Config.getDeviceId();
+        HttpAuthorizer authorizer = new HttpAuthorizer(Config.getPusherAuthUrl());
         PusherOptions options = new PusherOptions().setAuthorizer(authorizer);
-        deviceChannelName = "private-device_" + deviceId;
-        fleetChannelName = "presence-fleet_" + fleetId;
+        deviceChannelName = "private-device_" + Config.getDeviceId();
+        fleetChannelName = "presence-fleet_" + Config.getFleetId();
         pusher = new Pusher(pusherKey, options);
         EventBus.getDefault().registerSticky(this);
     }
@@ -151,7 +151,8 @@ public class PusherManager {
         Log.d(TAG, e.getMessage());
         if (e.getMode() == ChatEvent.Mode.BROADCAST_OUT) {
             e.setDevice(deviceId);
-            fleetChannel.trigger("client-all", gson.toJson(e));
+            if(fleetChannelActive)
+                fleetChannel.trigger("client-all", gson.toJson(e));
         }
     }
 
