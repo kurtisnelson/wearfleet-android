@@ -9,8 +9,10 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.IBinder;
+import android.widget.Toast;
 
 import com.wearfleet.core.events.AbortEvent;
+import com.wearfleet.core.utils.Config;
 
 import de.greenrobot.event.EventBus;
 
@@ -21,7 +23,13 @@ public abstract class FleetService extends Service  {
     @Override
     public void onCreate() {
         super.onCreate();
-        pusherManager = new PusherManager(getString(R.string.pusher_key));
+        Config config = new Config(this);
+        if(!config.isAuthenticated()) {
+            Toast.makeText(this, getString(R.string.not_authenticated), Toast.LENGTH_LONG);
+            stopSelf();
+        }else {
+            pusherManager = new PusherManager(getString(R.string.pusher_key), config);
+        }
     }
 
     @Override

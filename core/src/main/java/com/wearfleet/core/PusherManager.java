@@ -29,18 +29,20 @@ public class PusherManager {
     private static final Gson gson = new Gson();
     private static final String TAG = "PusherManager";
     private final int deviceId;
+    private final Config config;
     private Pusher pusher;
     private PrivateChannel deviceChannel;
     private PresenceChannel fleetChannel;
     private String fleetChannelName, deviceChannelName;
     private boolean fleetChannelActive, deviceChannelActive = false;
 
-    public PusherManager(String pusherKey) {
-        deviceId = Config.getDeviceId();
-        HttpAuthorizer authorizer = new HttpAuthorizer(Config.getPusherAuthUrl());
+    public PusherManager(String pusherKey, Config config) {
+        this.config = config;
+        deviceId = config.getDeviceId();
+        HttpAuthorizer authorizer = new HttpAuthorizer(config.getPusherAuthUrl());
         PusherOptions options = new PusherOptions().setAuthorizer(authorizer);
-        deviceChannelName = "private-device_" + Config.getDeviceId();
-        fleetChannelName = "presence-fleet_" + Config.getFleetId();
+        deviceChannelName = "private-device_" + config.getDeviceId();
+        fleetChannelName = "presence-fleet_" + config.getFleetId();
         pusher = new Pusher(pusherKey, options);
         EventBus.getDefault().registerSticky(this);
     }

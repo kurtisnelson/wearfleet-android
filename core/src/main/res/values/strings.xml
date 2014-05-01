@@ -5,4 +5,5 @@
     <string name="send_button">Send</string>
     <string name="no_messages">No Messages</string>
     <string name="new_messages">New Messages</string>
+    <string name="not_authenticated">Not authenticated</string>
 </resources>
