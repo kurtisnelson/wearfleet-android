@@ -56,4 +56,12 @@ public class Config {
         editor.putString(API_ENDPOINT, values[2]);
         editor.apply();
     }
+
+    public void clearAuthentication() {
+        SharedPreferences.Editor editor = sharedPreferences(context).edit();
+        editor.putString(USER_EMAIL, null);
+        editor.putString(USER_TOKEN, null);
+        editor.putString(API_ENDPOINT, null);
+        editor.apply();
+    }
 }

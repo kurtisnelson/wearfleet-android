@@ -10,7 +10,10 @@ import android.util.Log;
 
 import com.google.android.glass.media.Sounds;
 import com.google.android.glass.timeline.LiveCard;
+import com.wearfleet.core.ConfigActivity;
+import com.wearfleet.core.events.AbortEvent;
 import com.wearfleet.core.events.ChatEvent;
+import com.wearfleet.core.utils.Config;
 
 import de.greenrobot.event.EventBus;
 
@@ -22,8 +25,12 @@ public class LiveCardService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        FleetService.start(this);
-        publishCard();
+        if (new Config(this).isAuthenticated()) {
+            FleetService.start(this);
+            publishCard();
+        }else {
+            getApplication().startActivity(new Intent(getBaseContext(), ConfigActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        }
         return START_STICKY;
     }
 
@@ -81,5 +88,13 @@ public class LiveCardService extends Service {
         audio.playSoundEffect(Sounds.SUCCESS);
         if(mLiveCard != null)
             mLiveCard.navigate();
+    }
+
+    public void onEventMainThread(AbortEvent e){
+        Log.e(TAG, "Abort Event: " + e.getMessage());
+        AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        audio.playSoundEffect(Sounds.ERROR);
+        unpublishCard();
+        stopSelf();
     }
 }

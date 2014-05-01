@@ -43,7 +43,7 @@ public abstract class FleetService extends Service  {
         ConnectivityManager connMgr = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected()) {
+        if (pusherManager != null && networkInfo != null && networkInfo.isConnected()) {
             pusherManager.start();
             Intent i2 = new Intent(this, PositionService.class);
             this.startService(i2);
@@ -57,7 +57,8 @@ public abstract class FleetService extends Service  {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        pusherManager.shutdown();
+        if(pusherManager != null)
+            pusherManager.shutdown();
         Intent i2 = new Intent(this, PositionService.class);
         this.stopService(i2);
         unregisterReceiver(stopServiceReceiver);

@@ -57,6 +57,7 @@ public class PusherManager {
 
             @Override
             public void onError(String message, String code, Exception e) {
+                Log.e(TAG, code);
                 EventBus.getDefault().post(new AbortEvent(e));
             }
         }, ConnectionState.ALL);
@@ -90,6 +91,8 @@ public class PusherManager {
                         @Override
                         public void onAuthenticationFailure(String message, Exception e) {
                             Log.e(TAG, "Auth Failure: " + message);
+                            config.clearAuthentication();
+                            EventBus.getDefault().post(new AbortEvent(e));
                         }
 
                         @Override
